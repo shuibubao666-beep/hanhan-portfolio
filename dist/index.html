@@ -1,63 +1,58 @@
 <!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="刘含颖的交互作品集">
-  <title>刘含颖 · Portfolio</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; height: 100dvh; display: grid; grid-template-rows: auto minmax(0, 1fr); background: #edf2f6; color: #29434c; font: 14px system-ui, sans-serif; }
-    header { display: flex; justify-content: center; align-items: center; padding: 8px 12px; }
-    label { display: flex; align-items: center; gap: 10px; padding: 5px 12px; border: 1px solid #afbec9; border-radius: 24px; background: white; }
-    input { width: clamp(84px, 25vw, 150px); min-height: 24px; accent-color: #925171; }
-    output { min-width: 4ch; text-align: right; font-variant-numeric: tabular-nums; }
-    main { display: grid; place-items: center; min-height: 0; }
-    iframe { width: var(--size); height: var(--size); max-width: calc(100% - 16px); max-height: calc(100% - 16px); border: 0; border-radius: 10px; background: #dbeaf4; box-shadow: 0 6px 24px #29434c26; }
-  </style>
-</head>
-<body>
-  <header><label for="size">画布大小 <input type="range" id="size" min="60" max="100" step="5" value="85"><output for="size">85%</output></label></header>
-  <main><iframe title="刘含颖的作品集" style="--size:85%" allow="fullscreen"></iframe></main>
-  <script>
-    const control = document.querySelector('#size');
-    const output = document.querySelector('output');
-    const frame = document.querySelector('iframe');
-    const preference = 'portfolio-canvas-size';
-    const finale = /\/finale\.html$/.test(location.pathname);
-    const scene = finale ? 'finale-scene.html' : 'portfolio-scene.html';
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#c8e0ef"><meta name="description" content="刘含颖的交互作品集：IP设计、AIGC视觉、品牌设计、KV与UI设计。"><title>刘含颖 · Portfolio</title><link rel="stylesheet" href="portfolio.css"><link rel="stylesheet" href="layers.css"><link rel="stylesheet" href="directory.css"><link rel="stylesheet" href="title-motion.css"><link rel="stylesheet" href="view-size.css"></head>
+<body class="intro-active">
+<nav id="section-nav" aria-label="页面导航"><a href="#home" aria-current="location"><span>Home</span></a><a href="#about"><span>About</span></a><a href="#contents"><span>Projects</span></a><a href="finale.html"><span>Contact</span></a></nav>
+<main id="home" aria-label="刘含颖的作品集首页">
+<div class="collage" id="collage">
+<div id="stage"></div><video id="film" preload="none" playsinline muted poster="assets/layers/paper-first.jpg" aria-label="纸团展开，文字与打印机出现，小票逐渐打印出来"></video>
+<nav id="hotspots" aria-label="作品目录"></nav>
+<button id="replay" class="hotspot replay" aria-label="重新播放打印开场" title="重新打印" style="left:54.4%;top:35.5%;width:3.8%;height:3.8%"></button>
+<div id="intro" class="intro" aria-label="纸团展开与打印开场">
 
-    function resize() {
-      const size = `${control.value}%`;
-      output.value = size;
-      frame.style.setProperty('--size', size);
-    }
+<button id="start"><span>点击纸团，展开刘含颖的作品集</span></button>
+<button id="skip" hidden>跳过开场 ↗</button>
+<p id="status" role="status" hidden></p>
+</div>
+</div>
+<section id="about" aria-label="About me"></section></main><section hidden id="contents" aria-label="作品目录"><section class="folio" id="folio" aria-label="作品集目录:点击文件夹抽出五个项目小票">
 
-    try { control.value = localStorage.getItem(preference) || '85'; } catch {}
-    resize();
-    control.addEventListener('input', () => {
-      resize();
-      try { localStorage.setItem(preference, control.value); } catch {}
-    });
+  <div class="folio__stage" id="folio-stage">
+    <div class="folio__bg" aria-hidden="true"></div>
+    <div class="folio__wash" aria-hidden="true"></div>
 
-    function syncAddress() {
-      const inner = frame.contentWindow.location;
-      if (!/\/(portfolio|finale)-scene\.html$/.test(inner.pathname)) return;
-      const outer = new URL(inner.pathname.endsWith('/finale-scene.html') ? 'finale.html' : 'index.html', location.href);
-      if (outer.pathname.endsWith('/index.html') && location.pathname.endsWith('/')) outer.pathname = location.pathname;
-      outer.search = location.search;
-      outer.hash = inner.hash;
-      if (outer.href !== location.href) history.replaceState(null, '', outer);
-    }
+    <div class="folio__title" aria-label="Content">
+      <span class="folio__t-star-wrap" aria-hidden="true"><img class="folio__t-star" src="assets/folio/title-star.png" alt="" draggable="false"></span>
+      <span class="folio__t-letters-wrap" aria-hidden="true"><img class="folio__t-letters" src="assets/folio/title-letters.png" alt="" draggable="false"></span>
+    </div>
 
-    frame.addEventListener('load', () => {
-      frame.contentWindow.addEventListener('hashchange', syncAddress);
-      syncAddress();
-    });
-    window.addEventListener('hashchange', () => {
-      if (frame.contentWindow.location.hash !== location.hash) frame.contentWindow.location.hash = location.hash;
-    });
-    frame.src = scene + location.hash;
-  </script>
-</body>
-</html>
+    <div class="folio__folder" id="folio-folder">
+      <img class="folio__folder-box folio__folder-back" id="folio-folder-back" src="assets/folder-back.png" alt="">
+      <div class="folio__scatter" id="folio-scatter">
+        <button class="folio__ticket" type="button" data-project="01" aria-label="放大预览目录小票 01 IP设计 / 云端木棉岛"><span class="folio__ticket-card"><img src="assets/folio/ticket-01.png" alt="" draggable="false"></span></button>
+        <button class="folio__ticket" type="button" data-project="02" aria-label="放大预览目录小票 02 Aigc视觉设计 / H5设计、TVC、KV"><span class="folio__ticket-card"><img src="assets/folio/ticket-02.png" alt="" draggable="false"></span></button>
+        <button class="folio__ticket" type="button" data-project="03" aria-label="放大预览目录小票 03 品牌设计 / 流浪星球——动物救助品牌"><span class="folio__ticket-card"><img src="assets/folio/ticket-03.png" alt="" draggable="false"></span></button>
+        <button class="folio__ticket" type="button" data-project="04" aria-label="放大预览目录小票 04 KV设计 / 泡泡玛特20周年主题KV"><span class="folio__ticket-card"><img src="assets/folio/ticket-04.png" alt="" draggable="false"></span></button>
+        <button class="folio__ticket" type="button" data-project="05" aria-label="放大预览目录小票 05 UI设计 / 湖北省博小程序页面设计"><span class="folio__ticket-card"><img src="assets/folio/ticket-05.png" alt="" draggable="false"></span></button>
+      </div>
+      <div class="folio__flap" id="folio-flap" role="button" tabindex="0" aria-expanded="false" aria-label="文件夹:点击抽出或收起目录小票">
+        <img class="folio__folder-box folio__folder-front" src="assets/folder-front.png" alt="" draggable="false">
+      </div>
+    </div>
+
+    <p class="folio__hint" id="folio-hint">点击文件夹，抽出目录</p>
+  </div>
+
+  <!-- 浮层放在 stage 之外:stage 带 transform,会劫持 position:fixed 的包含块 -->
+  <div class="folio__overlay" id="folio-overlay" role="dialog" aria-modal="true" aria-label="小票放大预览">
+    <button class="folio__overlay-close" id="folio-overlay-close" type="button" aria-label="关闭预览">✕</button>
+    <div class="folio__overlay-ticket"><img id="folio-overlay-img" alt="目录小票放大预览"></div>
+  </div>
+
+</section></section>
+<button id="edit">编辑作品集</button><dialog id="editor"><h2>作品集编辑器</h2><label>选择图层 <select id="choice"></select></label><label>上传替换文件 <input id="pick" type="file"></label><p>修改保存在当前浏览器。透明素材建议使用 PNG。</p><output id="msg"></output><footer><button id="reset">恢复该素材</button><button id="done">完成</button></footer></dialog>
+<dialog id="project" aria-labelledby="project-title">
+<header class="project-bar"><button id="back">← 返回首页</button><div><span id="project-number"></span><h1 id="project-title"></h1></div><nav class="reader-zoom" aria-label="作品阅读缩放"><button type="button" data-zoom="out" aria-label="缩小">−</button><button type="button" data-zoom="reset" aria-label="恢复适合宽度" title="恢复适合宽度">100%</button><button type="button" data-zoom="in" aria-label="放大">＋</button></nav><span id="page-count"></span><nav id="aigc-sections" aria-label="AIGC 内容分类" hidden><button type="button" data-page="21">H5</button><button type="button" data-page="28">TVC</button><button type="button" data-page="32">KV 与海报练习</button></nav></header>
+<div id="project-pages" class="project-pages"></div>
+<footer class="project-footer"><button id="back-bottom">← 返回首页</button><button id="next">下一项目 →</button></footer>
+</dialog>
+<script src="portfolio.js"></script><script src="layers.js"></script><script src="title-motion.js"></script><script src="editor.js"></script><script src="motion.js"></script><script src="folio.js"></script><script src="directory.js"></script><script src="navigation.js"></script><script src="view-size.js"></script></body></html>

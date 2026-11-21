@@ -1,0 +1,42 @@
+:root { --view-scale: .9; --scene-height: max(180px, calc(100dvh - 112px)); }
+html { background: #e3eff7; }
+#home {
+  width: min(calc(100% * var(--view-scale)), calc(var(--scene-height) * 1121 / 1024 * var(--view-scale)));
+  margin: 58px auto 0;
+}
+#home > .tear-halves img:first-child { top: -5.53%; }
+#home > .tear-halves img:last-child { top: 38.1%; }
+#home > .tear-halves.closed img:first-child { transform: translateY(8%); }
+#home > .tear-halves.closed img:last-child { transform: translateY(-100%); }
+#intro .unfold-reference {
+  inset: 50% auto auto 50%;
+  width: calc(100% * var(--view-scale));
+  height: calc(100% * var(--view-scale));
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+}
+#contents .folio { width: min(calc(100% * var(--view-scale)), calc(var(--scene-height) * 1.6 * var(--view-scale))); }
+body > main[aria-label="感谢观看"] { width: min(calc(100% * var(--view-scale)), calc(var(--scene-height) * 16 / 9 * var(--view-scale))); }
+#project-pages figure {
+  width: min(100%, calc(var(--project-height, 65dvh) * var(--page-ratio, 1) * var(--reader-scale, 1)));
+  margin-inline: auto;
+}
+.view-tools {
+  position: fixed;
+  right: max(10px, env(safe-area-inset-right));
+  bottom: max(10px, env(safe-area-inset-bottom));
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 9px;
+  border: 1px solid #aabdc9;
+  border-radius: 24px;
+  background: #fffdf9f5;
+  color: #29434c;
+  font: 13px system-ui, sans-serif;
+}
+.view-tools label { display: flex; align-items: center; gap: 5px; }
+.view-tools input { width: clamp(65px, 15vw, 110px); min-height: 30px; accent-color: #925171; }
+.view-tools output { min-width: 4ch; }
+.view-tools button { background: white; border: 1px solid #aabdc9; border-radius: 16px; padding: 4px 8px; color: inherit; cursor: pointer; font: inherit; }

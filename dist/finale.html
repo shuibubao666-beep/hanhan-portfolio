@@ -1,63 +1,11 @@
-<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="刘含颖的交互作品集">
-  <title>刘含颖 · Portfolio</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; height: 100dvh; display: grid; grid-template-rows: auto minmax(0, 1fr); background: #edf2f6; color: #29434c; font: 14px system-ui, sans-serif; }
-    header { display: flex; justify-content: center; align-items: center; padding: 8px 12px; }
-    label { display: flex; align-items: center; gap: 10px; padding: 5px 12px; border: 1px solid #afbec9; border-radius: 24px; background: white; }
-    input { width: clamp(84px, 25vw, 150px); min-height: 24px; accent-color: #925171; }
-    output { min-width: 4ch; text-align: right; font-variant-numeric: tabular-nums; }
-    main { display: grid; place-items: center; min-height: 0; }
-    iframe { width: var(--size); height: var(--size); max-width: calc(100% - 16px); max-height: calc(100% - 16px); border: 0; border-radius: 10px; background: #dbeaf4; box-shadow: 0 6px 24px #29434c26; }
-  </style>
-</head>
-<body>
-  <header><label for="size">画布大小 <input type="range" id="size" min="60" max="100" step="5" value="85"><output for="size">85%</output></label></header>
-  <main><iframe title="刘含颖的作品集" style="--size:85%" allow="fullscreen"></iframe></main>
-  <script>
-    const control = document.querySelector('#size');
-    const output = document.querySelector('output');
-    const frame = document.querySelector('iframe');
-    const preference = 'portfolio-canvas-size';
-    const finale = /\/finale\.html$/.test(location.pathname);
-    const scene = finale ? 'finale-scene.html' : 'portfolio-scene.html';
-
-    function resize() {
-      const size = `${control.value}%`;
-      output.value = size;
-      frame.style.setProperty('--size', size);
-    }
-
-    try { control.value = localStorage.getItem(preference) || '85'; } catch {}
-    resize();
-    control.addEventListener('input', () => {
-      resize();
-      try { localStorage.setItem(preference, control.value); } catch {}
-    });
-
-    function syncAddress() {
-      const inner = frame.contentWindow.location;
-      if (!/\/(portfolio|finale)-scene\.html$/.test(inner.pathname)) return;
-      const outer = new URL(inner.pathname.endsWith('/finale-scene.html') ? 'finale.html' : 'index.html', location.href);
-      if (outer.pathname.endsWith('/index.html') && location.pathname.endsWith('/')) outer.pathname = location.pathname;
-      outer.search = location.search;
-      outer.hash = inner.hash;
-      if (outer.href !== location.href) history.replaceState(null, '', outer);
-    }
-
-    frame.addEventListener('load', () => {
-      frame.contentWindow.addEventListener('hashchange', syncAddress);
-      syncAddress();
-    });
-    window.addEventListener('hashchange', () => {
-      if (frame.contentWindow.location.hash !== location.hash) frame.contentWindow.location.hash = location.hash;
-    });
-    frame.src = scene + location.hash;
-  </script>
-</body>
-</html>
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>感谢观看 · 刘含颖</title><style>
+*{box-sizing:border-box}body{margin:0;background:#dbeaf4;min-height:100svh;display:grid;place-items:center}main{width:min(100vw,177.78svh);aspect-ratio:16/9;position:relative;overflow:hidden;isolation:isolate;container-type:inline-size;background:url(assets/finale/blue.webp) center/100% 100%}.art{position:absolute;inset:0;transition:opacity .5s;pointer-events:none}.open .art{opacity:.39}.burst,.label,.word{position:absolute}.burst{left:2%;top:17%;width:18%;translate:var(--bx,0px) var(--by,0px)}.label{left:60.4%;top:31%;width:15.4%}.word{left:9.75%;top:28.85%;width:80.6%;aspect-ratio:2048/606;translate:var(--x,0px) var(--y,0px)}.piece{position:absolute;inset:0;mask:url(assets/finale/remainder-mask.png) center/100% 100%;background:url(assets/finale/letters.webp) center/contain no-repeat;clip-path:var(--clip);animation:arrive .58s cubic-bezier(.2,1.35,.45,1) var(--delay) backwards;transform-origin:var(--pivot) center}@keyframes arrive{from{opacity:0;transform:translateY(8px) scale(.95)}}
+.star{animation:arrive .5s backwards,shine 4s .5s infinite ease-in-out;transform-origin:57% 15%}.cloud{animation:arrive .6s .2s backwards,float 5s .8s infinite ease-in-out}@keyframes shine{50%{rotate:2deg;filter:brightness(1.09)}}@keyframes float{50%{translate:0 -2px}}
+.note{position:absolute;left:76.097%;top:74.488%;width:29.5%;aspect-ratio:2048/1658;transition:transform .68s cubic-bezier(.22,.85,.3,1.04),filter .68s;transform:perspective(900px) rotate(-7.3deg);z-index:2}.note img{width:100%;display:block}.hit{position:absolute;inset:0;background:none;border:0;cursor:pointer}.hit:after{content:'Click to say hello';position:absolute;top:3%;left:10%;background:#fff9ed;padding:.4em .8em;border-radius:2em;color:#564453;opacity:0}.hit:focus-visible:after,.hit:hover:after{opacity:1}@media(hover:hover){main:not(.open) .note:hover{transform:perspective(900px) translate(-2.2%,-3%) rotate(-7.3deg) rotateX(-3deg) scale(1.12);filter:drop-shadow(0 9px 9px #35455b55)}}
+.open .note{transform:perspective(900px) translate(-138.463%, -107.677%) scale(1.93);filter:drop-shadow(0 10px 12px #33475a45)}.open .hit{visibility:hidden}.close{position:absolute;right:13%;top:14%;border:none;background:#fff9;border-radius:50%;width:32px;height:32px;cursor:pointer}.return{position:fixed;left:12px;top:12px;color:#344a60;background:#fffc;border-radius:2em;padding:6px 12px;text-decoration:none;font:14px system-ui;z-index:4}@media(max-width:600px){.open .note{transform:translate(-138.463%, -107.677%) scale(2.12)}.close{width:20px;height:20px}}@media(prefers-reduced-motion:reduce){*,*:before{animation:none!important;transition:none!important}.word,.burst{translate:none}}
+.title-pair{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+@media(prefers-reduced-motion:no-preference){
+ .title-pair{animation:pair-arrival .72s ease-out backwards}
+ @keyframes pair-arrival{0%{opacity:0;transform:translateY(9%)}43%{opacity:1;transform:translateY(-3.5%)}67%{transform:translateY(1.3%)}84%{transform:translateY(-.5%)}100%{transform:none}}
+}
+</style><link rel="stylesheet" href="title-motion.css"><link rel="stylesheet" href="view-size.css"><a class="return" href="./#contents">← 目录</a><main aria-label="感谢观看"><div class="art"><img class="burst" src="assets/finale/burst.webp" alt=""><img class="label" src="assets/finale/label.webp" alt="感谢观看"><div class="word" role="img" aria-label="Thank you!"></div></div><div class="note"><img src="assets/finale/contact-receipt.png" alt="刘含颖的联系方式，附微信和小红书二维码。电话 18086019585，邮箱 2359125148@qq.com"><button class="hit" aria-label="展开联系方式" aria-expanded="false"></button><button class="close" hidden aria-label="收起联系方式">×</button></div></main><script src="title-motion.js"></script><script src="finale.js"></script><script src="view-size.js"></script></html>
