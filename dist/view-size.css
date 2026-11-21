@@ -2,6 +2,7 @@
 html { background: #e3eff7; }
 html:has(body.intro-active) { scrollbar-gutter: auto; }
 .intro-active #section-nav { visibility: hidden; }
+#collage > #intro:not(.pull-apart) { background: #dceaf4; }
 #home {
   width: min(calc(100% * var(--view-scale)), calc(var(--scene-height) * 1121 / 1024 * var(--view-scale)));
   margin: 58px auto 0;
@@ -19,7 +20,6 @@ html:has(body.intro-active) { scrollbar-gutter: auto; }
 }
 @media (max-aspect-ratio: 3/4) {
   #intro .unfold-reference { object-fit: contain; }
-  #intro { background: #dceaf4; }
 }
 #contents .folio { width: min(calc(100% * var(--view-scale)), calc(var(--scene-height) * 1.6 * var(--view-scale))); }
 body > main[aria-label="感谢观看"] { width: min(calc(100% * var(--view-scale)), calc(var(--scene-height) * 16 / 9 * var(--view-scale))); }
