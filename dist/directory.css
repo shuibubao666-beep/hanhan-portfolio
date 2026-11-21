@@ -1,0 +1,297 @@
+
+/* ═══ 命名空间隔离:全部规则以 .folio 开头;重置只作用于 section 内部 ═══ */
+.folio,
+.folio *,
+.folio *::before,
+.folio *::after{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+/* CSS 变量声明在 .folio 上(不进 :root,不泄漏宿主) */
+.folio{
+  --paper-wash:#F4F7FB;
+  --folder-deep:#D4718C;
+  --folder-light:#F7D3DC;
+  --ticket-paper:#EDEAE3;
+  --ink-pixel:#8A8A8A;
+  --scrim:rgba(43,58,84,.6);
+  --shadow-in:drop-shadow(0 1px 3px rgba(88,108,138,.22));
+  --shadow-soft:drop-shadow(0 9px 16px rgba(88,108,138,.26));
+  --shadow-lift:drop-shadow(0 16px 26px rgba(70,92,124,.36));
+  --mono:"Spline Sans Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "PingFang SC", "Microsoft YaHei", monospace;
+  --folder-size:340px;
+  --ticket-w:164px;
+  --ticket-h:205px;
+  --hinge:78.5%;
+  --tilt:-8deg;
+  --tilt-origin:50% 78.5%;
+
+  position:relative;
+  width:100%;
+  max-width:1440px;
+  margin-inline:auto;
+  aspect-ratio:1440/900;
+  /* 唯一允许的裁切层:裁 1440×900 设计盒边界(stage 布局宽恒为 1440px,
+     transform:scale 不改变布局盒,不裁会产生横向溢出)。实测裁不到任何内容。 */
+  overflow:hidden;
+}
+
+/* 设计盒舞台:容器宽度驱动等比缩放(--fs 由 ResizeObserver 写入) */
+.folio__stage{
+  position:absolute;
+  top:0;left:0;
+  width:1440px;height:900px;
+  transform-origin:top left;
+  transform:scale(var(--fs,1));
+}
+
+/* 背景两层:皱纸 + 极淡暖白提亮(原 body/fixed 方案移入 section,不用
+   background-attachment:fixed——iOS Safari 不可靠) */
+.folio__bg{
+  position:absolute;inset:0;
+  background:url("assets/folio/bg-dots.webp") center/cover no-repeat;
+  z-index:0;
+}
+.folio__wash{
+  position:absolute;inset:0;
+  background:rgba(255,255,255,.10);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ═══ 标题:基础态 = 完全可见的最终静止态(反空白硬约束,无 opacity:0 持久态);
+   .is-intro 只负责播放一次入场 ═══ */
+.folio__title{
+  position:absolute;left:50%;top:48px;
+  width:360px;height:180px;
+  transform:translateX(-50%);
+  user-select:none;
+}
+.folio__t-star-wrap{
+  position:absolute;left:-2px;top:2px;width:138px;height:153px;z-index:1;
+  transform-origin:50% 50%;
+}
+.folio__t-letters-wrap{
+  position:absolute;left:72px;top:10px;width:306px;height:171px;z-index:2;
+  transform-origin:50% 50%;
+}
+.folio__title img{
+  display:block;width:100%;height:100%;
+  object-fit:contain;
+  transform-origin:50% 50%;
+  user-select:none;
+}
+/* 入场(进入视口触发一次) */
+.folio.is-intro .folio__t-star{
+  animation:folio-star-in 540ms ease-out both;
+}
+.folio.is-intro .folio__t-letters{
+  animation:folio-letters-in 920ms ease-out 130ms both;
+}
+/* 待机(挂在 wrap 层,与 img 上的入场互不覆盖;保持原 1s delay 关系) */
+.folio.is-intro .folio__t-star-wrap{
+  animation:folio-star-idle-spin 4.5s ease-in-out 1s infinite,
+            folio-star-idle-bounce 5.5s ease-out 1s infinite;
+}
+.folio.is-intro .folio__t-letters-wrap{
+  animation:folio-letters-idle-breath 3.2s ease-in-out 1s infinite;
+}
+
+/* ═══ 文件夹 ═══ */
+.folio__folder{
+  position:absolute;left:550px;top:463px;
+  width:var(--folder-size);height:var(--folder-size);
+  perspective:1300px;
+}
+/* 后壳与前盖共用同一方形容器与完全相同的盒模型(禁止分别设尺寸/定位) */
+.folio__folder-box{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:contain;
+}
+.folio__folder-back{
+  z-index:1;cursor:pointer;
+  transform:rotateX(var(--tilt));
+  transform-origin:var(--tilt-origin);
+}
+.folio__flap{
+  position:absolute;inset:0;z-index:3;
+  transform-origin:var(--tilt-origin);
+  transform:rotateX(var(--tilt));
+  transition:transform 620ms cubic-bezier(.32,1.25,.35,1) 430ms;
+  cursor:pointer;
+  outline:none;
+}
+.folio__flap:focus-visible{outline:2px dashed var(--ink-pixel);outline-offset:6px;}
+.folio.is-open .folio__flap{
+  transform:rotateX(-105deg);
+  transition:transform 760ms cubic-bezier(.3,1.36,.4,1) 60ms;
+}
+
+/* ═══ 小票(闭合态藏票靠 scale(.82)+top:72px 几何 + z 序,不用任何裁切) ═══ */
+.folio__scatter{
+  position:absolute;inset:0;z-index:2;pointer-events:none;
+}
+.folio__ticket{
+  position:absolute;left:88px;top:72px;
+  width:var(--ticket-w);height:var(--ticket-h);
+  pointer-events:auto;
+  background:none;border:0;padding:0;
+  transform:translate(0,0) rotate(var(--rot-c)) scale(.82);
+  transition:transform 620ms cubic-bezier(.25,1.22,.4,1) var(--dc,0ms);
+  cursor:default;
+}
+.folio.is-open .folio__ticket{
+  transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(var(--open-size,1));
+  transition-delay:var(--do,0ms);
+  cursor:pointer;
+}
+.folio__ticket-card{
+  display:block;width:100%;height:100%;
+  filter:var(--shadow-in);
+  transition:transform 210ms ease-out, filter 480ms ease-out;
+}
+.folio__ticket-card img{
+  display:block;width:100%;height:100%;
+  object-fit:contain;
+  user-select:none;
+}
+.folio.is-open .folio__ticket-card{filter:var(--shadow-soft);}
+.folio.is-open .folio__ticket:hover .folio__ticket-card,
+.folio.is-open .folio__ticket:focus-visible .folio__ticket-card{
+  transform:translateY(-12px) scale(1.04);
+  filter:var(--shadow-lift);
+  transition:transform 210ms ease-out, filter 210ms ease-out;
+}
+.folio.is-open .folio__ticket:focus-visible{outline:2px dashed var(--ink-pixel);outline-offset:4px;}
+/* 五位错落变量(stagger --do 01→05;收起 --dc 05→01 逆序) */
+.folio__ticket:nth-child(1){--rot-c:-2deg;--rot:-6deg;--dx:-435px;--dy:-298px;--do:0ms;--dc:320ms;}
+.folio__ticket:nth-child(2){--rot-c:2deg;--rot:5deg;--dx:-240px;--dy:-214px;--do:80ms;--dc:240ms;}
+.folio__ticket:nth-child(3){--rot-c:-1deg;--rot:-3deg;--dx:0px;--dy:-268px;--do:160ms;--dc:160ms;}
+.folio__ticket:nth-child(4){--rot-c:2deg;--rot:6deg;--dx:240px;--dy:-214px;--do:240ms;--dc:80ms;}
+.folio__ticket:nth-child(5){--rot-c:-2deg;--rot:-5deg;--dx:435px;--dy:-298px;--do:320ms;--dc:0ms;}
+
+/* ═══ 提示条(页面唯一活文字) ═══ */
+.folio__hint{
+  position:absolute;left:50%;top:812px;
+  transform:translateX(-50%);
+  font-family:var(--mono);
+  font-size:16px;letter-spacing:.14em;
+  color:var(--ink-pixel);
+  background:rgba(244,247,251,.78);
+  padding:7px 16px;border-radius:999px;
+  text-shadow:0 0 6px rgba(244,247,251,.9);
+  white-space:nowrap;
+  transition:opacity .6s ease;
+}
+.folio__hint.is-gone{opacity:0;visibility:hidden;transition:opacity .6s ease, visibility 0s linear .6s;}
+
+/* ═══ 放大浮层:模态锚视口(fixed),必须放在 .folio__stage 之外——stage 的
+   transform 会劫持 fixed 的包含块;z-index:9999,宿主按需调整 ═══ */
+.folio__overlay{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--scrim);
+  opacity:0;visibility:hidden;
+  transition:opacity 320ms ease, visibility 0s linear 320ms;
+  display:flex;align-items:center;justify-content:center;
+}
+.folio__overlay.is-show{opacity:1;visibility:visible;transition:opacity 320ms ease;}
+.folio__overlay-ticket img{
+  height:82vh;max-width:92vw;
+  aspect-ratio:677/846;
+  width:auto;
+  object-fit:contain;
+  transform:scale(.55) rotate(0deg);
+  transition:transform 480ms cubic-bezier(.3,1.3,.4,1);
+  filter:var(--shadow-lift);
+  user-select:none;
+}
+.folio__overlay.is-show .folio__overlay-ticket img{transform:scale(1) rotate(0deg);}
+.folio__overlay-close{
+  position:absolute;top:28px;right:32px;
+  width:46px;height:46px;border-radius:50%;
+  border:0;cursor:pointer;
+  background:var(--ticket-paper);
+  color:var(--ink-pixel);
+  font-family:var(--mono);
+  font-size:20px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 14px rgba(30,42,66,.28);
+}
+.folio__overlay-close:focus-visible{outline:2px dashed var(--ticket-paper);outline-offset:3px;}
+
+/* ═══ keyframes(名字全局,统一 folio- 前缀) ═══ */
+@keyframes folio-star-in{
+  0%{transform:scale(.08) rotate(-22deg);opacity:0}
+  38%{transform:scale(1.36) rotate(9deg);opacity:1}
+  63%{transform:scale(.93) rotate(-5deg)}
+  82%{transform:scale(1.06) rotate(2deg)}
+  100%{transform:none}
+}
+@keyframes folio-letters-in{
+  0%{transform:translateY(28px) scale(.65) rotate(-6deg);opacity:0}
+  40%{transform:translateY(-8px) scale(1.15) rotate(4deg);opacity:1}
+  64%{transform:translateY(4px) scale(.96) rotate(-2.5deg)}
+  82%{transform:translateY(-2px) scale(1.03) rotate(1deg)}
+  100%{transform:none}
+}
+@keyframes folio-letters-idle-breath{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.015);}
+}
+@keyframes folio-star-idle-spin{
+  0%,100%{transform:rotate(-3deg);}
+  50%{transform:rotate(3deg);}
+}
+@keyframes folio-star-idle-bounce{
+  0%,4.727%,100%{transform:scale(1);}
+  2.364%{transform:scale(1.07);}
+}
+
+/* ═══ 降级:动画归零,功能与可读性完整(标题静止最终态本就可见) ═══ */
+@media (prefers-reduced-motion: reduce){
+  .folio .folio__flap,
+  .folio.is-open .folio__flap,
+  .folio .folio__ticket,
+  .folio.is-open .folio__ticket,
+  .folio .folio__ticket-card,
+  .folio .folio__overlay,
+  .folio .folio__overlay-ticket img,
+  .folio .folio__hint,
+  .folio .folio__t-star-wrap,
+  .folio .folio__t-letters-wrap,
+  .folio .folio__t-star,
+  .folio .folio__t-letters{
+    transition:none !important;
+    animation:none !important;
+  }
+  .folio.is-open .folio__flap{transform:rotateX(-105deg);}
+  .folio.is-open .folio__ticket:hover .folio__ticket-card,
+  .folio.is-open .folio__ticket:focus-visible .folio__ticket-card{transform:none;}
+  .folio .folio__overlay-ticket img{transform:none;}
+}
+
+#home[hidden],#contents[hidden]{display:none!important}
+#contents:not([hidden]){min-height:100dvh;padding-top:64px;background:#f3f7fa}
+
+#contents .folio__title img,#contents .folio__ticket-card img,#contents .folio__folder-box{height:100%}
+#contents img.shell-missing{background:linear-gradient(155deg,#f9d0de,#d786a6);clip-path:polygon(4% 26%,35% 26%,42% 32%,96% 32%,96% 80%,4% 80%)}
+#contents .folio__folder-back.shell-missing{background:#c87898;clip-path:polygon(4% 21%,33% 21%,40% 27%,96% 27%,96% 80%,4% 80%)}
+
+/* Enlarge toward the board centre at the outside edges. */
+.folio.is-open .folio__ticket:first-child .folio__ticket-card{transform-origin:12% 18%}
+.folio.is-open .folio__ticket:last-child .folio__ticket-card{transform-origin:88% 18%}
+.folio.is-open .folio__ticket-card{transform-origin:50% 18%}
+.folio.is-open .folio__ticket:focus-visible{z-index:6}
+.folio.is-open .folio__ticket:focus-visible .folio__ticket-card{transform:scale(1.42)}
+@media (hover:hover) and (pointer:fine){
+ .folio.is-open .folio__scatter:has(.folio__ticket:hover){z-index:4}
+ .folio.is-open .folio__ticket:hover{z-index:7}
+ .folio.is-open .folio__ticket:hover .folio__ticket-card{transform:scale(1.42)}
+}
+.folio.is-open .folio__scatter:focus-within{z-index:4}
+@media(prefers-reduced-motion:reduce){
+ .folio.is-open .folio__ticket .folio__ticket-card{transition:none}
+}
