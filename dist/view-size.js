@@ -8,17 +8,30 @@
   const fullscreen = tools.querySelector('button');
   const root = document.documentElement;
   const preference = 'portfolio-view-size';
-  try { slider.value = localStorage.getItem(preference) || '90'; } catch {}
+  let pageSize = '90';
+  let introSize = '100';
+  try { pageSize = localStorage.getItem(preference) || pageSize; } catch {}
+  const inIntro = () => document.body.classList.contains('intro-active');
 
   function resize() {
-    root.style.setProperty('--view-scale', slider.value / 100);
+    root.style.setProperty('--view-scale', pageSize / 100);
+    root.style.setProperty('--intro-scale', introSize / 100);
     output.value = `${slider.value}%`;
     slider.setAttribute('aria-valuetext', output.value);
   }
-  resize();
-  slider.addEventListener('input', () => {
+  function syncSlider() {
+    slider.value = inIntro() ? introSize : pageSize;
     resize();
-    try { localStorage.setItem(preference, slider.value); } catch {}
+  }
+  syncSlider();
+  new MutationObserver(syncSlider).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  slider.addEventListener('input', () => {
+    if (inIntro()) introSize = slider.value;
+    else {
+      pageSize = slider.value;
+      try { localStorage.setItem(preference, pageSize); } catch {}
+    }
+    resize();
   });
 
   if (document.fullscreenEnabled) {

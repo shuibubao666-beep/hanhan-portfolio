@@ -1,5 +1,7 @@
 :root { --view-scale: .9; --scene-height: max(180px, calc(100dvh - 112px)); }
 html { background: #e3eff7; }
+html:has(body.intro-active) { scrollbar-gutter: auto; }
+.intro-active #section-nav { visibility: hidden; }
 #home {
   width: min(calc(100% * var(--view-scale)), calc(var(--scene-height) * 1121 / 1024 * var(--view-scale)));
   margin: 58px auto 0;
@@ -10,10 +12,14 @@ html { background: #e3eff7; }
 #home > .tear-halves.closed img:last-child { transform: translateY(-100%); }
 #intro .unfold-reference {
   inset: 50% auto auto 50%;
-  width: calc(100% * var(--view-scale));
-  height: calc(100% * var(--view-scale));
+  width: calc(100% * var(--intro-scale, 1));
+  height: calc(100% * var(--intro-scale, 1));
   transform: translate(-50%, -50%);
-  object-fit: contain;
+  object-fit: cover;
+}
+@media (max-aspect-ratio: 3/4) {
+  #intro .unfold-reference { object-fit: contain; }
+  #intro { background: #dceaf4; }
 }
 #contents .folio { width: min(calc(100% * var(--view-scale)), calc(var(--scene-height) * 1.6 * var(--view-scale))); }
 body > main[aria-label="感谢观看"] { width: min(calc(100% * var(--view-scale)), calc(var(--scene-height) * 16 / 9 * var(--view-scale))); }
