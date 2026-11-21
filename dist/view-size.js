@@ -39,16 +39,19 @@
     const bar = project.querySelector('.project-bar');
     const pages = project.querySelector('#project-pages');
     function fitProject() {
-      for (const image of pages.querySelectorAll('figure > img')) {
-        image.parentElement.style.setProperty('--page-ratio', Number(image.getAttribute('width')) / Number(image.getAttribute('height')));
-      }
-      project.style.setProperty('--project-height', `max(140px, calc(100dvh - ${bar.offsetHeight + 16}px))`);
+      const firstPage = pages.querySelector('figure > img');
+      if (!firstPage || !project.open) return;
+      const ratio = Number(firstPage.getAttribute('width')) / Number(firstPage.getAttribute('height'));
+      const availableHeight = Math.max(140, project.clientHeight - bar.offsetHeight - 16);
+      project.style.setProperty('--project-fit-width', `${availableHeight * ratio}px`);
     }
     new ResizeObserver(fitProject).observe(bar);
+    window.addEventListener('resize', fitProject);
+    document.addEventListener('fullscreenchange', fitProject);
     new MutationObserver(fitProject).observe(pages, { childList: true });
     fitProject();
     const reset = project.querySelector('[data-zoom="reset"]');
-    reset.title = '恢复整张适屏';
+    reset.title = '恢复统一适屏宽度';
     reset.setAttribute('aria-label', reset.title);
   }
 })();

@@ -17,10 +17,12 @@ html { background: #e3eff7; }
 }
 #contents .folio { width: min(calc(100% * var(--view-scale)), calc(var(--scene-height) * 1.6 * var(--view-scale))); }
 body > main[aria-label="感谢观看"] { width: min(calc(100% * var(--view-scale)), calc(var(--scene-height) * 16 / 9 * var(--view-scale))); }
-#project-pages figure {
-  width: min(100%, calc(var(--project-height, 65dvh) * var(--page-ratio, 1) * var(--reader-scale, 1)));
-  margin-inline: auto;
+#project-pages {
+  width: calc(min(100%, 1600px, var(--project-fit-width, 100%)) * var(--reader-scale, 1));
 }
+#project-pages figure { width: 100%; }
+#project .project-bar { width: 100%; }
+#project .reader-zoom [data-zoom="reset"] { width: 4.25em; flex: 0 0 4.25em; }
 .view-tools {
   position: fixed;
   right: max(10px, env(safe-area-inset-right));
