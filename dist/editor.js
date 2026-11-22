@@ -1,24 +1,11 @@
-const stage=document.querySelector('#stage'),aboutScene=document.querySelector('#about'),choice=document.querySelector('#choice'),pick=document.querySelector('#pick'),editor=document.querySelector('#editor'),msg=document.querySelector('#msg');
+const stage=document.querySelector('#stage'),aboutScene=document.querySelector('#about');
 const items=new Map();
-function register(key,name,el,src){choice.add(new Option(name,key));items.set(key,{el,src});}
 layers.forEach(({key,name,rect:[x,y,w,h],scene},i)=>{
  const im=new Image();im.alt=name;im.className='layer '+key;im.src='assets/layers/'+key+'.webp';
  im.style.cssText='left:'+x/19.2+'%;top:'+y/17.54+'%;width:'+w/19.2+'%;height:'+h/17.54+'%;--delay:'+(scene?(i-11)*.12:i>=6?2.85+(i-6)*.18:i===5?.28:i===2?.48:i*.07)+'s';
- (scene?aboutScene:stage).append(im);register(key,name,im,im.src);
+ (scene?aboutScene:stage).append(im);items.set(key,{el:im});
 });
 
-const db=new Promise((resolve,reject)=>{const req=indexedDB.open('portfolio-assets-v1',1);req.onupgradeneeded=()=>req.result.createObjectStore('assets');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});
-async function change(key,file){const database=await db;await new Promise((ok,no)=>{const tx=database.transaction('assets','readwrite'),s=tx.objectStore('assets');if(file)s.put(file,key);else s.delete(key);tx.oncomplete=ok;tx.onerror=()=>no(tx.error)});apply(key,file)}
-function apply(key,file){if(key==="intro")document.querySelector("#collage").classList.remove("film-ended");const it=items.get(key);if(it.url)URL.revokeObjectURL(it.url);it.url=file?URL.createObjectURL(file):null;it.el.src=it.url||it.src;
- for(const [i,section] of [stage,aboutScene].entries()){
-   section.classList.toggle('custom',Boolean(items.get('texture')?.url)||layers.some(l=>l.scene===i&&items.get(l.key)?.url));
- }
-}
-db.then(database=>{const q=database.transaction('assets').objectStore('assets').openCursor();q.onsuccess=()=>{const c=q.result;if(c){if(items.has(c.key))apply(c.key,c.value);c.continue()}}}).catch(()=>{msg.textContent='当前浏览器无法保存素材'});
-choice.onchange=()=>{pick.accept=['intro','unfoldClip'].includes(choice.value)?'video/*':'image/*';pick.value='';msg.textContent=''};choice.onchange();
-document.querySelector('#edit').onclick=()=>{finishIntro();editor.showModal()};document.querySelector('#done').onclick=()=>editor.close();
-pick.onchange=async()=>{const f=pick.files[0];if(!f)return;try{await change(choice.value,f);msg.textContent='已替换并保存'}catch{msg.textContent='保存失败，请检查浏览器存储空间'}};
-document.querySelector('#reset').onclick=async()=>{try{await change(choice.value,null);pick.value='';msg.textContent='已恢复原素材'}catch{msg.textContent='恢复失败，请重试'}};
 if(intro.classList.contains('finished'))stage.classList.add('anim');
 new MutationObserver(()=>{if(intro.classList.contains('finished'))stage.classList.add('anim')}).observe(intro,{attributes:true,attributeFilter:['class']});
 // Trigger each sticker from its resting position, independent of its animation transform.
@@ -42,7 +29,6 @@ function updateAbout() {
    resetAbout();
    return;
  }
- if (editor.open) return;
  const visible = Math.max(0, Math.min(innerHeight,box.bottom) - Math.max(0,box.top));
  const fraction = visible / Math.min(innerHeight,box.height);
  const moved = window.scrollY > 2;
@@ -66,13 +52,11 @@ function queueAbout() {
 window.addEventListener('scroll',queueAbout,{passive:true});
 window.addEventListener('resize',queueAbout);
 dialog.addEventListener('close',queueAbout);
-editor.addEventListener('close',queueAbout);
 new MutationObserver(queueAbout).observe(document.body,{attributes:true,attributeFilter:['class']});
 queueAbout();
-const bg=new Image();bg.onload=()=>{document.querySelector('#home').style.backgroundImage=items.get('texture')?.url?'url("'+bg.src+'")':''};bg.src='assets/cover/background.webp';register('texture','蓝色纸张背景',bg,bg.src);
 const receiptImage=stage.querySelector('.paper'),sleeve=document.createElement('div');sleeve.className='sleeve';sleeve.style.cssText=receiptImage.style.cssText;stage.insertBefore(sleeve,receiptImage);sleeve.append(receiptImage);
 
-// Keep the artwork registered with the editor. The outer layer handles landing,
+// Keep the artwork available to the card and title animations. The outer layer handles landing,
 // while the inner chassis pivots around the paper outlet during the feed.
 const machineArt = items.get('printer').el;
 const machineLayer = document.createElement('div');

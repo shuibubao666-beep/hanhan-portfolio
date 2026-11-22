@@ -1,7 +1,6 @@
 // Times are relative to the opening of the paper. The receipt and cards are separate layers.
-const timingDefaults = { tear: 2.35, feed: 2.25, cards: 3.35 };
-let timing = {...timingDefaults};
-try { Object.assign(timing, JSON.parse(localStorage.getItem('portfolio-timing') || '{}')); } catch {}
+const timing = { tear: 2.35, feed: 2.25, cards: 3.35 };
+for (const [key, seconds] of Object.entries(timing)) document.body.style.setProperty('--'+key,seconds+'s');
 // The idle frame and the unfolding clip share the same camera and crop.
 const unfold = document.createElement('video');
 unfold.className = 'unfold-reference';
@@ -11,31 +10,16 @@ unfold.preload = 'auto';
 unfold.muted = true;
 unfold.playsInline = true;
 intro.prepend(unfold);
-register('unfoldClip','纸团展开视频',unfold,unfold.src);
 const halves = document.createElement('div');
 halves.className = 'tear-halves';
-const sheets = ['upper','lower'].map((key,index)=>{
+const sheets = ['upper','lower'].map(key=>{
  const image = new Image();
  image.alt = '';
  image.src = 'assets/opening/'+key+'.webp';
  halves.append(image);
- register('tear-'+key,index?'撕纸下半张':'撕纸上半张',image,image.src);
  return image;
 });
 document.querySelector('#home').prepend(halves);
-const preview = document.createElement('button');
-preview.textContent = '预览完整动效';
-editor.querySelector('footer').prepend(preview);
-const controls = document.createElement('fieldset');
-controls.innerHTML='<legend>动效节奏</legend>';
-editor.querySelector('footer').before(controls);
-for(const [key,label,min,max] of [['tear','纸张展开',1,4],['feed','小票走纸',1,5],['cards','作品卡入场延迟',1,6]]){
- const field=document.createElement('label'),input=document.createElement('input'),value=document.createElement('span');
- input.type='range';input.min=min;input.max=max;input.step=.05;input.value=timing[key];
- function update(){timing[key]=Number(input.value);value.textContent=label+' · '+input.value+' 秒';document.body.style.setProperty('--'+key,timing[key]+'s');}
- input.oninput=()=>{update();try{localStorage.setItem('portfolio-timing',JSON.stringify(timing))}catch{}};
- field.append(value,input);controls.append(field);update();
-}
 let activeRun;
 function stopSequence(){
  activeRun?.abort();
@@ -60,7 +44,7 @@ function playUnfold(signal){
    unfold.play().catch(reject);
  });
 }
-async function openPaper(demo=false){
+async function openPaper(){
  stopSequence();
  activeRun=new AbortController();
  const {signal}=activeRun;
@@ -94,15 +78,10 @@ async function openPaper(demo=false){
  if(signal.aborted)return;
  halves.classList.remove('closed');
  finishIntro();stage.classList.add('anim');
- if(demo){const id=setTimeout(()=>{if(!dialog.open&&!editor.open)aboutScene.scrollIntoView({behavior:reduced?'instant':'smooth'})},(Math.max(1.25+timing.feed,timing.cards+1.2)+.5)*1000);
- signal.addEventListener('abort',()=>clearTimeout(id),{once:true});}
 }
 start.onclick=()=>openPaper();
 document.querySelector('#replay').onclick=()=>openPaper();
-preview.onclick=()=>{editor.close();openPaper(true)};
 skip.onclick=()=>{stopSequence();finishIntro()};
-const originalEdit=document.querySelector('#edit').onclick;
-document.querySelector('#edit').onclick=()=>{stopSequence();originalEdit()};
 const cardKeys=['ip','aigc','brand','kv','ui'];
 for(const anchor of hotspots.querySelectorAll('.stamp')){
  const image=items.get(cardKeys[Number(anchor.dataset.project)]).el;

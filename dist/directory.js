@@ -1,11 +1,8 @@
 (() => {
- const board=document.querySelector('#folio'),parts=new Map(),storage='portfolio-directory-layout-v1';
- let saved={};try{saved=JSON.parse(localStorage.getItem(storage))||{}}catch{}
+ const board=document.querySelector('#folio'),parts=new Map();
  function bind(key,label,selector,x,y,width){
   const el=board.querySelector(selector),geometry=[x/14.4,y/9,width/14.4];
-  const values=Array.isArray(saved[key])&&saved[key].length===3&&saved[key].every(Number.isFinite)?saved[key].slice():geometry;
-  parts.set(key,{el,label,values});
-  if(key!=='folder'){const img=el.querySelector('img');register('directory-'+key,'目录 · '+label,img,img.src)}
+  parts.set(key,{el,values:geometry});
  }
  bind('title','Content 标题','.folio__t-letters-wrap',586,6,324);
  bind('star','星形贴纸','.folio__t-star-wrap',530,10,108);
@@ -40,22 +37,5 @@
   const img=board.querySelector('.folio__folder-'+side);
   function check(){img.classList.toggle('shell-missing',!img.naturalWidth)}
   img.addEventListener('load',check);img.addEventListener('error',check);check();
-  register('directory-folder-'+side,side==='front'?'目录 · 文件夹前盖':'目录 · 文件夹后壳',img,img.src);
  }
- const bg=new Image();bg.onload=()=>board.querySelector('.folio__bg').style.backgroundImage='url("'+bg.src+'")';bg.src='assets/folio/bg-dots.webp';register('directory-texture','目录 · 蓝纸背景',bg,bg.src);
- const field=document.createElement('fieldset');field.innerHTML='<legend>目录排版</legend>';
- editor.querySelector('footer').before(field);
- const select=document.createElement('select');select.setAttribute('aria-label','目录元素');field.append(select);
- for(const [key,{label}] of parts)select.add(new Option(label,key));select.value='title';
- const inputs=['水平位置 (%)','垂直位置 (%)','宽度 (%)'].map((name,i)=>{
-  const label=document.createElement('label'),input=document.createElement('input');
-  input.type='number';input.min=i===2?2:-30;input.max=120;input.step=.1;label.append(name,input);field.append(label);
-  input.oninput=()=>{if(!input.validity.valid || !Number.isFinite(input.valueAsNumber))return;
-   const item=parts.get(select.value);item.values[i]=input.valueAsNumber;saved[select.value]=item.values;draw();try{localStorage.setItem(storage,JSON.stringify(saved))}catch{}};
-  return input;
- });
- function refresh(){inputs.forEach((input,i)=>input.value=parts.get(select.value).values[i])}
- select.onchange=refresh;refresh();
- const preview=document.createElement('button');preview.type='button';preview.textContent='查看目录排版';field.append(preview);
- preview.onclick=()=>{editor.close();if(!board.classList.contains('is-open'))board.querySelector('#folio-flap').click();location.hash='contents';board.scrollIntoView()};
 })();
